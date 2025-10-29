@@ -97,7 +97,7 @@ fn main() {
     let scale = 0.5;
     let rotation = Vector3::new(0.0, 0.0, 0.0);
 
-    let obj = Obj::load("./models/nave1.obj").expect("Failed to load obj");
+    let obj = Obj::load("assets/models/sphere.obj").expect("Failed to load obj");
     
     // vertex_array ya es Vec<Vertex> gracias a los cambios en obj.rs
     let vertex_array = obj.get_vertex_array();
