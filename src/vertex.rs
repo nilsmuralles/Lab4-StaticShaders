@@ -1,6 +1,4 @@
-//vertex.rs
 #![allow(dead_code)]
-
 use raylib::math::{Vector2, Vector3};
 
 #[derive(Clone, Debug)]
@@ -11,6 +9,7 @@ pub struct Vertex {
   pub color: Vector3,
   pub transformed_position: Vector3,
   pub transformed_normal: Vector3,
+  pub world_position: Vector3,
 }
 
 impl Vertex {
@@ -22,6 +21,7 @@ impl Vertex {
       color: Vector3::new(0.0, 0.0, 0.0), // Black
       transformed_position: position,
       transformed_normal: normal,
+      world_position: Vector3::new(0.0, 0.0, 0.0),
     }
   }
 
@@ -33,6 +33,7 @@ impl Vertex {
       color,
       transformed_position: Vector3::new(0.0, 0.0, 0.0),
       transformed_normal: Vector3::new(0.0, 0.0, 0.0),
+      world_position: Vector3::new(0.0, 0.0, 0.0),
     }
   }
 
@@ -48,9 +49,10 @@ impl Default for Vertex {
       position: Vector3::new(0.0, 0.0, 0.0),
       normal: Vector3::new(0.0, 1.0, 0.0),
       tex_coords: Vector2::new(0.0, 0.0),
-      color: Vector3::new(0.0, 0.0, 0.0), // Black
+      color: Vector3::new(0.0, 0.0, 0.0),
       transformed_position: Vector3::new(0.0, 0.0, 0.0),
       transformed_normal: Vector3::new(0.0, 1.0, 0.0),
+      world_position: Vector3::zero()
     }
   }
 }

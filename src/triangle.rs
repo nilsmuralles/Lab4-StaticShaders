@@ -1,7 +1,6 @@
 // triangle.rs
 use crate::fragment::Fragment;
 use crate::vertex::Vertex;
-use crate::line::line;
 use crate::Vector3;
 use crate::light::Light;
 
@@ -28,13 +27,6 @@ fn barycentric_coordinates(p_x: f32, p_y: f32, a: &Vertex, b: &Vertex, c: &Verte
 
 pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex, light: &Light) -> Vec<Fragment> {
     let mut fragments = Vec::new();
-
-    // === DEMO: Uncomment to show RGB color interpolation ===
-    // Assign RGB colors to the three vertices for interpolation demonstration
-    // let color1 = Vector3::new(1.0, 0.0, 0.0); // Red
-    // let color2 = Vector3::new(0.0, 0.0, 1.0); // Blue
-    // let color3 = Vector3::new(0.0, 1.0, 0.0); // Green
-
     // Base draw color for all vertices
     let base_color = Vector3::new(0.5, 0.5, 0.5);
 
@@ -55,14 +47,6 @@ pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex, light: &Light) -> Vec<Fra
 
             // Check if point is inside the triangle
             if w1 >= 0.0 && w2 >= 0.0 && w3 >= 0.0 {
-                // === DEMO: Uncomment to show RGB color interpolation ===
-                // Interpolate color using barycentric coordinates
-                // let interpolated_color = Vector3::new(
-                //     w1 * color1.x + w2 * color2.x + w3 * color3.x,
-                //     w1 * color1.y + w2 * color2.y + w3 * color3.y,
-                //     w1 * color1.z + w2 * color2.z + w3 * color3.z,
-                // );
-
                 // Interpolate normals using barycentric coordinates
                 let interpolated_normal = Vector3::new(
                     w1 * v1.transformed_normal.x + w2 * v2.transformed_normal.x + w3 * v3.transformed_normal.x,

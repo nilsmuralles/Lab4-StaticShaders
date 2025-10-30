@@ -1,6 +1,4 @@
-// main.rs
 mod framebuffer;
-mod line;
 mod triangle;
 mod obj;
 mod matrix;
@@ -30,7 +28,7 @@ pub struct Uniforms {
     pub viewport_matrix: Matrix,
 }
 
-fn render(framebuffer: &mut Framebuffer, uniforms: &Uniforms, vertex_array: &[Vertex], light: &Light) {
+fn render(framebuffer: &mut Framebuffer, uniforms: &Uniforms, vertex_array: &[Vertex], light: &Light, shader_type: &str) {
     // Vertex Shader Stage
     let mut transformed_vertices = Vec::with_capacity(vertex_array.len());
     for vertex in vertex_array {
@@ -58,8 +56,7 @@ fn render(framebuffer: &mut Framebuffer, uniforms: &Uniforms, vertex_array: &[Ve
 
     // Fragment Processing Stage
     for fragment in fragments {
-
-        let final_color = fragment_shaders(&fragment, uniforms);
+        let final_color = fragment_shaders(&fragment, uniforms, shader_type);
             
         framebuffer.point(
             fragment.position.x as i32,
@@ -76,30 +73,25 @@ fn main() {
 
     let (mut window, raylib_thread) = raylib::init()
         .size(window_width, window_height)
-        .title("Ship")
+        .title("Static Shaders")
         .log_level(TraceLogLevel::LOG_WARNING)
         .build();
 
     let mut framebuffer = Framebuffer::new(window_width, window_height);
     
-    // Inicializar cámara
     let mut camera = Camera::new(
-        Vector3::new(0.0, 0.0, 5.0), // eye
-        Vector3::new(0.0, 0.0, 0.0), // target
-        Vector3::new(0.0, 1.0, 0.0), // up
+        Vector3::new(0.0, 0.0, 5.0),
+        Vector3::new(0.0, 0.0, 0.0),
+        Vector3::new(0.0, 1.0, 0.0),
     );
 
-    // Light
     let light = Light::new(Vector3::new(5.0, 5.0, 5.0));
 
-    // Parámetros de transformación del modelo (fijos)
-    let translation = Vector3::new(0.0, 0.0, 0.0);
     let scale = 0.5;
     let rotation = Vector3::new(0.0, 0.0, 0.0);
 
     let obj = Obj::load("assets/models/sphere.obj").expect("Failed to load obj");
     
-    // vertex_array ya es Vec<Vertex> gracias a los cambios en obj.rs
     let vertex_array = obj.get_vertex_array();
 
     framebuffer.set_background_color(Color::new(0, 0, 0, 255));
@@ -109,22 +101,20 @@ fn main() {
         
         framebuffer.clear();
         framebuffer.set_current_color(Color::new(200, 200, 255, 255));
-        
-        // Crear matrices de transformación
-        let model_matrix = create_model_matrix(translation, scale, rotation);
+
         let view_matrix = camera.get_view_matrix();
         let projection_matrix = create_projection_matrix(PI / 3.0, window_width as f32 / window_height as f32, 0.1, 100.0);
         let viewport_matrix = create_viewport_matrix(0.0, 0.0, window_width as f32, window_height as f32);
 
-        // Crear uniforms
-        let uniforms = Uniforms {
-            model_matrix,
-            view_matrix,
-            projection_matrix,
-            viewport_matrix,
+        let earth_translation = Vector3::new(0.0, 0.0, 0.0);
+        let earth_model_matrix = create_model_matrix(earth_translation, scale, rotation);
+        let earth_uniforms = Uniforms {
+            model_matrix: earth_model_matrix,
+            view_matrix: view_matrix.clone(),
+            projection_matrix: projection_matrix.clone(),
+            viewport_matrix: viewport_matrix.clone(),
         };
-
-        render(&mut framebuffer, &uniforms, &vertex_array, &light);
+        render(&mut framebuffer, &earth_uniforms, &vertex_array, &light, "earth");
 
         framebuffer.swap_buffers(&mut window, &raylib_thread);
         
