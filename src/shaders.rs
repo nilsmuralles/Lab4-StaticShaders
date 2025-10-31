@@ -85,20 +85,31 @@ pub fn earth_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
     
     let noise1 = (uv.x * 3.0).sin() * (uv.y * 2.5).cos();
     let noise2 = (uv.x * 5.0 + 100.0).cos() * (uv.y * 4.0 + 50.0).sin();
-    let pattern = (noise1 + noise2 * 0.5).abs();
+    let noise3 = (uv.x * 7.0 - 80.0).sin() * (uv.y * 6.0 + 120.0).cos();
+    let pattern = (noise1 + noise2 * 0.5 + noise3 * 0.3).abs();
     
+    let deep_ocean = Vector3::new(0.02, 0.15, 0.35);
     let ocean = Vector3::new(0.05, 0.3, 0.55);
+    let shallow = Vector3::new(0.15, 0.45, 0.6);
     let land = Vector3::new(0.25, 0.5, 0.2);
     let mountain = Vector3::new(0.4, 0.35, 0.25);
+    let snow = Vector3::new(0.85, 0.9, 0.95);
     
-    let base_color = if pattern > 0.7 {
+    let base_color = if pattern > 0.85 {
+        snow
+    } else if pattern > 0.7 {
         mountain
-    } else if pattern > 0.4 {
+    } else if pattern > 0.5 {
         land
-    } else {
+    } else if pattern > 0.3 {
+        shallow
+    } else if pattern > 0.15 {
         ocean
+    } else {
+        deep_ocean
     };
     
+    // Add cloud layer
     let cloud_pattern = ((uv.x * 7.0 + 200.0).sin() * (uv.y * 6.0 + 150.0).cos()).abs();
     let clouds = Vector3::new(1.0, 1.0, 1.0) * 0.3;
     
@@ -117,8 +128,11 @@ pub fn jupiter_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
     let band_pos = uv.y * 15.0;
     let band = band_pos.sin() * 0.5 + 0.5;
     
-    let turbulence = (uv.x * 10.0 + uv.y * 3.0).sin() * 
-                     (uv.x * 7.0 - uv.y * 5.0).cos() * 0.3;
+    let turbulence1 = (uv.x * 10.0 + uv.y * 3.0).sin() * 
+                      (uv.x * 7.0 - uv.y * 5.0).cos();
+    let turbulence2 = (uv.x * 15.0 - uv.y * 8.0).cos() *
+                      (uv.x * 5.0 + uv.y * 12.0).sin();
+    let turbulence = (turbulence1 + turbulence2 * 0.5) * 0.3;
     
     let spot_x = uv.x - 300.0;
     let spot_y = uv.y - 250.0;
@@ -129,17 +143,26 @@ pub fn jupiter_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
         Vector3::new(0.0, 0.0, 0.0)
     };
     
-    let color1 = Vector3::new(0.8, 0.6, 0.4);
-    let color2 = Vector3::new(0.7, 0.4, 0.2);
-    let color3 = Vector3::new(0.6, 0.35, 0.15);
+    let pale_cream = Vector3::new(0.9, 0.8, 0.6);
+    let cream = Vector3::new(0.8, 0.6, 0.4);
+    let light_orange = Vector3::new(0.75, 0.5, 0.3);
+    let orange = Vector3::new(0.7, 0.4, 0.2);
+    let dark_brown = Vector3::new(0.6, 0.35, 0.15);
+    let deep_brown = Vector3::new(0.5, 0.25, 0.1);
     
     let band_value = band + turbulence;
-    let base_color = if band_value > 0.66 {
-        color1
+    let base_color = if band_value > 0.83 {
+        pale_cream
+    } else if band_value > 0.66 {
+        cream
+    } else if band_value > 0.5 {
+        light_orange
     } else if band_value > 0.33 {
-        color2
+        orange
+    } else if band_value > 0.16 {
+        dark_brown
     } else {
-        color3
+        deep_brown
     };
     
     (base_color + red_spot) * 1.1
@@ -150,18 +173,28 @@ pub fn namek_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
     
     let noise1 = (uv.x * 4.0).sin() * (uv.y * 3.5).cos();
     let noise2 = (uv.x * 6.0 + 50.0).cos() * (uv.y * 5.5 + 30.0).sin();
-    let pattern = (noise1 + noise2 * 0.6).abs();
+    let noise3 = (uv.x * 8.0 - 70.0).sin() * (uv.y * 7.0 + 90.0).cos();
+    let pattern = (noise1 + noise2 * 0.6 + noise3 * 0.4).abs();
     
+    let deep_water = Vector3::new(0.05, 0.4, 0.35);
     let water = Vector3::new(0.1, 0.5, 0.4);
+    let light_grass = Vector3::new(0.5, 0.9, 0.5);
     let grass = Vector3::new(0.4, 0.85, 0.4);
     let forest = Vector3::new(0.2, 0.65, 0.2);
+    let dark_forest = Vector3::new(0.15, 0.5, 0.15);
     
-    let base_color = if pattern > 0.65 {
-        forest
-    } else if pattern > 0.35 {
+    let base_color = if pattern > 0.83 {
+        light_grass
+    } else if pattern > 0.66 {
         grass
-    } else {
+    } else if pattern > 0.5 {
+        forest
+    } else if pattern > 0.33 {
+        dark_forest
+    } else if pattern > 0.16 {
         water
+    } else {
+        deep_water
     };
     
     let glow = Vector3::new(0.3, 0.5, 0.3) * 0.2;
@@ -175,19 +208,29 @@ pub fn sun_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
     let noise1 = (uv.x * 3.0).sin() * (uv.y * 2.8).cos();
     let noise2 = (uv.x * 5.5 + 100.0).cos() * (uv.y * 4.5 + 80.0).sin();
     let noise3 = (uv.x * 8.0 - uv.y * 6.0).sin();
+    let noise4 = (uv.x * 11.0 + 150.0).cos() * (uv.y * 9.0 - 120.0).sin();
     
-    let turbulence = (noise1 + noise2 * 0.5 + noise3 * 0.3).abs();
+    let turbulence = (noise1 + noise2 * 0.5 + noise3 * 0.3 + noise4 * 0.2).abs();
     
+    let white_hot = Vector3::new(1.0, 1.0, 0.95);
     let bright_yellow = Vector3::new(1.0, 1.0, 0.6);
+    let yellow = Vector3::new(1.0, 0.85, 0.4);
     let orange = Vector3::new(1.0, 0.7, 0.2);
     let deep_orange = Vector3::new(1.0, 0.5, 0.1);
+    let red_orange = Vector3::new(0.95, 0.4, 0.05);
     
-    let base_color = if turbulence > 0.7 {
+    let base_color = if turbulence > 0.83 {
+        white_hot
+    } else if turbulence > 0.66 {
         bright_yellow
-    } else if turbulence > 0.4 {
+    } else if turbulence > 0.5 {
+        yellow
+    } else if turbulence > 0.33 {
         orange
-    } else {
+    } else if turbulence > 0.16 {
         deep_orange
+    } else {
+        red_orange
     };
     
     base_color * 2.5
