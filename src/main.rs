@@ -68,33 +68,31 @@ fn render(framebuffer: &mut Framebuffer, uniforms: &Uniforms, vertex_array: &[Ve
 }
 
 fn main() {
-    let window_width = 1300;
-    let window_height = 900;
+    let window_width = 800;
+    let window_height = 600;
 
     let (mut window, raylib_thread) = raylib::init()
         .size(window_width, window_height)
-        .title("Static Shaders")
+        .title("Static shaders")
         .log_level(TraceLogLevel::LOG_WARNING)
         .build();
 
     let mut framebuffer = Framebuffer::new(window_width, window_height);
     
     let mut camera = Camera::new(
-        Vector3::new(0.0, 0.0, 5.0),
+        Vector3::new(0.0, 8.0, 10.0),
         Vector3::new(0.0, 0.0, 0.0),
         Vector3::new(0.0, 1.0, 0.0),
     );
 
-    let light = Light::new(Vector3::new(5.0, 5.0, 5.0));
-
-    let scale = 0.5;
-    let rotation = Vector3::new(0.0, 0.0, 0.0);
+    let light = Light::new(Vector3::new(0.0, 0.0, 0.0));
 
     let obj = Obj::load("assets/models/sphere.obj").expect("Failed to load obj");
-    
     let vertex_array = obj.get_vertex_array();
 
-    framebuffer.set_background_color(Color::new(0, 0, 0, 255));
+    framebuffer.set_background_color(Color::new(5, 5, 15, 255));
+
+    let mut time: f32 = 0.0;
 
     while !window.window_should_close() {
         camera.process_input(&window);
@@ -106,8 +104,29 @@ fn main() {
         let projection_matrix = create_projection_matrix(PI / 3.0, window_width as f32 / window_height as f32, 0.1, 100.0);
         let viewport_matrix = create_viewport_matrix(0.0, 0.0, window_width as f32, window_height as f32);
 
-        let earth_translation = Vector3::new(0.0, 0.0, 0.0);
-        let earth_model_matrix = create_model_matrix(earth_translation, scale, rotation);
+        time += 0.005;
+
+        let sun_scale = 1.5;
+        let sun_rotation = Vector3::new(0.0, time * 0.3, 0.0); // Slow rotation
+        let sun_translation = Vector3::new(0.0, 0.0, 0.0);
+        let sun_model_matrix = create_model_matrix(sun_translation, sun_scale, sun_rotation);
+        let sun_uniforms = Uniforms {
+            model_matrix: sun_model_matrix,
+            view_matrix: view_matrix.clone(),
+            projection_matrix: projection_matrix.clone(),
+            viewport_matrix: viewport_matrix.clone(),
+        };
+        render(&mut framebuffer, &sun_uniforms, &vertex_array, &light, "sun");
+
+        let earth_orbit_radius = 4.0;
+        let earth_orbit_speed = 1.0;
+        let earth_angle = time * earth_orbit_speed;
+        let earth_x = earth_orbit_radius * earth_angle.cos();
+        let earth_z = earth_orbit_radius * earth_angle.sin();
+        let earth_translation = Vector3::new(earth_x, 0.0, earth_z);
+        let earth_scale = 0.5;
+        let earth_rotation = Vector3::new(0.0, time * 2.0, 0.0); // Self rotation
+        let earth_model_matrix = create_model_matrix(earth_translation, earth_scale, earth_rotation);
         let earth_uniforms = Uniforms {
             model_matrix: earth_model_matrix,
             view_matrix: view_matrix.clone(),
@@ -115,6 +134,40 @@ fn main() {
             viewport_matrix: viewport_matrix.clone(),
         };
         render(&mut framebuffer, &earth_uniforms, &vertex_array, &light, "earth");
+
+        let namek_orbit_radius = 7.0;
+        let namek_orbit_speed = 0.7;
+        let namek_angle = time * namek_orbit_speed;
+        let namek_x = namek_orbit_radius * namek_angle.cos();
+        let namek_z = namek_orbit_radius * namek_angle.sin();
+        let namek_translation = Vector3::new(namek_x, 0.0, namek_z);
+        let namek_scale = 0.45;
+        let namek_rotation = Vector3::new(0.0, time * 1.8, 0.0);
+        let namek_model_matrix = create_model_matrix(namek_translation, namek_scale, namek_rotation);
+        let namek_uniforms = Uniforms {
+            model_matrix: namek_model_matrix,
+            view_matrix: view_matrix.clone(),
+            projection_matrix: projection_matrix.clone(),
+            viewport_matrix: viewport_matrix.clone(),
+        };
+        render(&mut framebuffer, &namek_uniforms, &vertex_array, &light, "namek");
+
+        let jupiter_orbit_radius = 10.5;
+        let jupiter_orbit_speed = 0.4;
+        let jupiter_angle = time * jupiter_orbit_speed;
+        let jupiter_x = jupiter_orbit_radius * jupiter_angle.cos();
+        let jupiter_z = jupiter_orbit_radius * jupiter_angle.sin();
+        let jupiter_translation = Vector3::new(jupiter_x, 0.0, jupiter_z);
+        let jupiter_scale = 0.8;
+        let jupiter_rotation = Vector3::new(0.0, time * 3.0, 0.0); // Fast rotation for gas giant
+        let jupiter_model_matrix = create_model_matrix(jupiter_translation, jupiter_scale, jupiter_rotation);
+        let jupiter_uniforms = Uniforms {
+            model_matrix: jupiter_model_matrix,
+            view_matrix: view_matrix.clone(),
+            projection_matrix: projection_matrix.clone(),
+            viewport_matrix: viewport_matrix.clone(),
+        };
+        render(&mut framebuffer, &jupiter_uniforms, &vertex_array, &light, "jupiter");
 
         framebuffer.swap_buffers(&mut window, &raylib_thread);
         

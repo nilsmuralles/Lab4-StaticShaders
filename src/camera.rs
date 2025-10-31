@@ -42,8 +42,8 @@ impl Camera {
             pitch,
             distance,
             rotation_speed: 0.05,
-            zoom_speed: 0.5,
-            pan_speed: 0.1,
+            zoom_speed: 1.0,
+            pan_speed: 0.2,
         }
     }
 

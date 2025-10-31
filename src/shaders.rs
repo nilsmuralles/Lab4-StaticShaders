@@ -81,20 +81,116 @@ pub fn vertex_shader(vertex: &Vertex, uniforms: &Uniforms) -> Vertex {
 }
 
 pub fn earth_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
-    let uv = fragment.position * 0.02;
-
-    let pattern = (uv.x.sin() * uv.y.cos()).abs();
-
-    let base_color = if pattern > 0.3 {
-        Vector3::new(0.2, 0.7, 0.3)
+    let uv = fragment.position * 0.015;
+    
+    let noise1 = (uv.x * 3.0).sin() * (uv.y * 2.5).cos();
+    let noise2 = (uv.x * 5.0 + 100.0).cos() * (uv.y * 4.0 + 50.0).sin();
+    let pattern = (noise1 + noise2 * 0.5).abs();
+    
+    let ocean = Vector3::new(0.05, 0.3, 0.55);
+    let land = Vector3::new(0.25, 0.5, 0.2);
+    let mountain = Vector3::new(0.4, 0.35, 0.25);
+    
+    let base_color = if pattern > 0.7 {
+        mountain
+    } else if pattern > 0.4 {
+        land
     } else {
-        Vector3::new(0.0, 0.3, 0.6)
+        ocean
     };
+    
+    let cloud_pattern = ((uv.x * 7.0 + 200.0).sin() * (uv.y * 6.0 + 150.0).cos()).abs();
+    let clouds = Vector3::new(1.0, 1.0, 1.0) * 0.3;
+    
+    let final_color = if cloud_pattern > 0.75 {
+        base_color * 0.7 + clouds
+    } else {
+        base_color
+    };
+    
+    final_color * 1.2
+}
 
-    let day_factor = ((uv.x * 0.5).cos() + 1.0) * 0.5;
-    let shaded = base_color * (0.3 + 0.7 * day_factor);
+pub fn jupiter_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
+    let uv = fragment.position * 0.01;
+    
+    let band_pos = uv.y * 15.0;
+    let band = band_pos.sin() * 0.5 + 0.5;
+    
+    let turbulence = (uv.x * 10.0 + uv.y * 3.0).sin() * 
+                     (uv.x * 7.0 - uv.y * 5.0).cos() * 0.3;
+    
+    let spot_x = uv.x - 300.0;
+    let spot_y = uv.y - 250.0;
+    let spot_dist = (spot_x * spot_x + spot_y * spot_y * 4.0).sqrt();
+    let red_spot = if spot_dist < 50.0 {
+        Vector3::new(0.4, 0.1, 0.05) * (1.0 - spot_dist / 50.0)
+    } else {
+        Vector3::new(0.0, 0.0, 0.0)
+    };
+    
+    let color1 = Vector3::new(0.8, 0.6, 0.4);
+    let color2 = Vector3::new(0.7, 0.4, 0.2);
+    let color3 = Vector3::new(0.6, 0.35, 0.15);
+    
+    let band_value = band + turbulence;
+    let base_color = if band_value > 0.66 {
+        color1
+    } else if band_value > 0.33 {
+        color2
+    } else {
+        color3
+    };
+    
+    (base_color + red_spot) * 1.1
+}
 
-    shaded
+pub fn namek_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
+    let uv = fragment.position * 0.012;
+    
+    let noise1 = (uv.x * 4.0).sin() * (uv.y * 3.5).cos();
+    let noise2 = (uv.x * 6.0 + 50.0).cos() * (uv.y * 5.5 + 30.0).sin();
+    let pattern = (noise1 + noise2 * 0.6).abs();
+    
+    let water = Vector3::new(0.1, 0.5, 0.4);
+    let grass = Vector3::new(0.4, 0.85, 0.4);
+    let forest = Vector3::new(0.2, 0.65, 0.2);
+    
+    let base_color = if pattern > 0.65 {
+        forest
+    } else if pattern > 0.35 {
+        grass
+    } else {
+        water
+    };
+    
+    let glow = Vector3::new(0.3, 0.5, 0.3) * 0.2;
+    
+    (base_color + glow) * 1.4
+}
+
+pub fn sun_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
+    let uv = fragment.position * 0.008;
+    
+    let noise1 = (uv.x * 3.0).sin() * (uv.y * 2.8).cos();
+    let noise2 = (uv.x * 5.5 + 100.0).cos() * (uv.y * 4.5 + 80.0).sin();
+    let noise3 = (uv.x * 8.0 - uv.y * 6.0).sin();
+    
+    let turbulence = (noise1 + noise2 * 0.5 + noise3 * 0.3).abs();
+    
+    let bright_yellow = Vector3::new(1.0, 1.0, 0.6);
+    let orange = Vector3::new(1.0, 0.7, 0.2);
+    let deep_orange = Vector3::new(1.0, 0.5, 0.1);
+    
+    let base_color = if turbulence > 0.7 {
+        bright_yellow
+    } else if turbulence > 0.4 {
+        orange
+    } else {
+        deep_orange
+    };
+    
+    base_color * 2.5
 }
 
 pub fn fragment_shaders(
@@ -104,6 +200,9 @@ pub fn fragment_shaders(
 ) -> Vector3 {
     match shader_type {
         "earth" => earth_shader(fragment, uniforms),
+        "jupiter" => jupiter_shader(fragment, uniforms),
+        "namek" => namek_shader(fragment, uniforms),
+        "sun" => sun_shader(fragment, uniforms),
         _ => earth_shader(fragment, uniforms),
     }
 }
