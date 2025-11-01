@@ -80,7 +80,7 @@ fn main() {
     let mut framebuffer = Framebuffer::new(window_width, window_height);
     
     let mut camera = Camera::new(
-        Vector3::new(0.0, 8.0, 10.0),
+        Vector3::new(0.0, 8.0, 20.0),
         Vector3::new(0.0, 0.0, 0.0),
         Vector3::new(0.0, 1.0, 0.0),
     );
@@ -124,7 +124,7 @@ fn main() {
         let earth_x = earth_orbit_radius * earth_angle.cos();
         let earth_z = earth_orbit_radius * earth_angle.sin();
         let earth_translation = Vector3::new(earth_x, 0.0, earth_z);
-        let earth_scale = 0.5;
+        let earth_scale = 0.8;
         let earth_rotation = Vector3::new(0.0, time * 2.0, 0.0); // Self rotation
         let earth_model_matrix = create_model_matrix(earth_translation, earth_scale, earth_rotation);
         let earth_uniforms = Uniforms {
@@ -135,13 +135,31 @@ fn main() {
         };
         render(&mut framebuffer, &earth_uniforms, &vertex_array, &light, "earth");
 
+        let moon_orbit_radius = 1.5;
+        let moon_orbit_speed = 3.0;
+        let moon_angle = time * moon_orbit_speed;
+        let moon_x = earth_x + moon_orbit_radius * moon_angle.cos();
+        let moon_y = moon_orbit_radius * 0.3 * moon_angle.sin(); // Vertical component
+        let moon_z = earth_z + moon_orbit_radius * moon_angle.sin();
+        let moon_translation = Vector3::new(moon_x, moon_y, moon_z);
+        let moon_scale = 0.2;
+        let moon_rotation = Vector3::new(0.0, time * 1.0, 0.0);
+        let moon_model_matrix = create_model_matrix(moon_translation, moon_scale, moon_rotation);
+        let moon_uniforms = Uniforms {
+            model_matrix: moon_model_matrix,
+            view_matrix: view_matrix.clone(),
+            projection_matrix: projection_matrix.clone(),
+            viewport_matrix: viewport_matrix.clone(),
+        };
+        render(&mut framebuffer, &moon_uniforms, &vertex_array, &light, "moon");
+
         let namek_orbit_radius = 7.0;
         let namek_orbit_speed = 0.7;
         let namek_angle = time * namek_orbit_speed;
         let namek_x = namek_orbit_radius * namek_angle.cos();
         let namek_z = namek_orbit_radius * namek_angle.sin();
         let namek_translation = Vector3::new(namek_x, 0.0, namek_z);
-        let namek_scale = 0.45;
+        let namek_scale = 0.75;
         let namek_rotation = Vector3::new(0.0, time * 1.8, 0.0);
         let namek_model_matrix = create_model_matrix(namek_translation, namek_scale, namek_rotation);
         let namek_uniforms = Uniforms {
@@ -158,8 +176,8 @@ fn main() {
         let jupiter_x = jupiter_orbit_radius * jupiter_angle.cos();
         let jupiter_z = jupiter_orbit_radius * jupiter_angle.sin();
         let jupiter_translation = Vector3::new(jupiter_x, 0.0, jupiter_z);
-        let jupiter_scale = 0.8;
-        let jupiter_rotation = Vector3::new(0.0, time * 3.0, 0.0); // Fast rotation for gas giant
+        let jupiter_scale = 1.3;
+        let jupiter_rotation = Vector3::new(0.0, time * 3.0, 0.0)
         let jupiter_model_matrix = create_model_matrix(jupiter_translation, jupiter_scale, jupiter_rotation);
         let jupiter_uniforms = Uniforms {
             model_matrix: jupiter_model_matrix,

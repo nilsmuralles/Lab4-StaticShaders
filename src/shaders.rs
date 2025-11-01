@@ -128,10 +128,8 @@ pub fn jupiter_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
     let band_pos = uv.y * 15.0;
     let band = band_pos.sin() * 0.5 + 0.5;
     
-    let turbulence1 = (uv.x * 10.0 + uv.y * 3.0).sin() * 
-                      (uv.x * 7.0 - uv.y * 5.0).cos();
-    let turbulence2 = (uv.x * 15.0 - uv.y * 8.0).cos() *
-                      (uv.x * 5.0 + uv.y * 12.0).sin();
+    let turbulence1 = (uv.x * 10.0 + uv.y * 3.0).sin() * (uv.x * 7.0 - uv.y * 5.0).cos();
+    let turbulence2 = (uv.x * 15.0 - uv.y * 8.0).cos() * (uv.x * 5.0 + uv.y * 12.0).sin();
     let turbulence = (turbulence1 + turbulence2 * 0.5) * 0.3;
     
     let spot_x = uv.x - 300.0;
@@ -236,6 +234,32 @@ pub fn sun_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
     base_color * 2.5
 }
 
+pub fn moon_shader(fragment: &Fragment, _uniforms: &Uniforms) -> Vector3 {
+    let uv = fragment.position * 0.025;
+    
+    let noise1 = (uv.x * 5.0).sin() * (uv.y * 4.5).cos();
+    let noise2 = (uv.x * 8.0 + 80.0).cos() * (uv.y * 7.0 + 60.0).sin();
+    let noise3 = (uv.x * 12.0 - 40.0).sin() * (uv.y * 10.0 + 100.0).cos();
+    let crater_pattern = (noise1 + noise2 * 0.6 + noise3 * 0.4).abs();
+    
+    let dark_gray = Vector3::new(0.25, 0.25, 0.27);
+    let gray = Vector3::new(0.4, 0.4, 0.42);
+    let light_gray = Vector3::new(0.55, 0.55, 0.57);
+    let bright_spot = Vector3::new(0.7, 0.7, 0.72);
+    
+    let base_color = if crater_pattern > 0.75 {
+        bright_spot
+    } else if crater_pattern > 0.5 {
+        light_gray
+    } else if crater_pattern > 0.25 {
+        gray
+    } else {
+        dark_gray
+    };
+    
+    base_color * 1.0
+}
+
 pub fn fragment_shaders(
     fragment: &Fragment,
     uniforms: &Uniforms,
@@ -246,6 +270,7 @@ pub fn fragment_shaders(
         "jupiter" => jupiter_shader(fragment, uniforms),
         "namek" => namek_shader(fragment, uniforms),
         "sun" => sun_shader(fragment, uniforms),
+        "moon" => moon_shader(fragment, uniforms),
         _ => earth_shader(fragment, uniforms),
     }
 }
