@@ -177,7 +177,7 @@ fn main() {
         let jupiter_z = jupiter_orbit_radius * jupiter_angle.sin();
         let jupiter_translation = Vector3::new(jupiter_x, 0.0, jupiter_z);
         let jupiter_scale = 1.3;
-        let jupiter_rotation = Vector3::new(0.0, time * 3.0, 0.0)
+        let jupiter_rotation = Vector3::new(0.0, time * 3.0, 0.0);
         let jupiter_model_matrix = create_model_matrix(jupiter_translation, jupiter_scale, jupiter_rotation);
         let jupiter_uniforms = Uniforms {
             model_matrix: jupiter_model_matrix,
