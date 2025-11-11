@@ -22,7 +22,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(eye: Vector3, target: Vector3, up: Vector3) -> Self {
+        pub fn new(eye: Vector3, target: Vector3, up: Vector3) -> Self {
         // Calculate initial yaw and pitch from eye and target
         let direction = Vector3::new(
             eye.x - target.x,

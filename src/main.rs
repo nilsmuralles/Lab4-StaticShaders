@@ -68,12 +68,12 @@ fn render(framebuffer: &mut Framebuffer, uniforms: &Uniforms, vertex_array: &[Ve
 }
 
 fn main() {
-    let window_width = 800;
-    let window_height = 600;
+    let window_width = 1300;
+    let window_height = 900;
 
     let (mut window, raylib_thread) = raylib::init()
         .size(window_width, window_height)
-        .title("Static shaders")
+        .title("Solar System - Earth, Jupiter, Namek & Sun")
         .log_level(TraceLogLevel::LOG_WARNING)
         .build();
 
@@ -176,8 +176,8 @@ fn main() {
         let jupiter_x = jupiter_orbit_radius * jupiter_angle.cos();
         let jupiter_z = jupiter_orbit_radius * jupiter_angle.sin();
         let jupiter_translation = Vector3::new(jupiter_x, 0.0, jupiter_z);
-        let jupiter_scale = 1.3;
-        let jupiter_rotation = Vector3::new(0.0, time * 3.0, 0.0);
+        let jupiter_scale = 1.3; // Larger than other planets
+        let jupiter_rotation = Vector3::new(0.0, time * 3.0, 0.0); // Fast rotation for gas giant
         let jupiter_model_matrix = create_model_matrix(jupiter_translation, jupiter_scale, jupiter_rotation);
         let jupiter_uniforms = Uniforms {
             model_matrix: jupiter_model_matrix,

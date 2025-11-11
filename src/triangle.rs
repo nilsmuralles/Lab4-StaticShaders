@@ -27,8 +27,6 @@ fn barycentric_coordinates(p_x: f32, p_y: f32, a: &Vertex, b: &Vertex, c: &Verte
 
 pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex, light: &Light) -> Vec<Fragment> {
     let mut fragments = Vec::new();
-    // Base draw color for all vertices
-    let base_color = Vector3::new(0.5, 0.5, 0.5);
 
     // Get the bounding box of the triangle
     let min_x = v1.transformed_position.x.min(v2.transformed_position.x).min(v3.transformed_position.x).floor() as i32;
@@ -67,9 +65,9 @@ pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex, light: &Light) -> Vec<Fra
 
                 // Calculate position in world space for this fragment
                 let world_pos = Vector3::new(
-                    w1 * v1.position.x + w2 * v2.position.x + w3 * v3.position.x,
-                    w1 * v1.position.y + w2 * v2.position.y + w3 * v3.position.y,
-                    w1 * v1.position.z + w2 * v2.position.z + w3 * v3.position.z,
+                    w1 * v1.world_position.x + w2 * v2.world_position.x + w3 * v3.world_position.x,
+                    w1 * v1.world_position.y + w2 * v2.world_position.y + w3 * v3.world_position.y,
+                    w1 * v1.world_position.z + w2 * v2.world_position.z + w3 * v3.world_position.z,
                 );
 
                 // Light direction (from surface to light) for this fragment
@@ -88,23 +86,27 @@ pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex, light: &Light) -> Vec<Fra
                 }
 
                 // Calculate per-fragment lighting intensity using interpolated normal (Lambertian shading)
-                let intensity = (normalized_normal.x * light_dir.x
+                let diffuse = (normalized_normal.x * light_dir.x
                     + normalized_normal.y * light_dir.y
                     + normalized_normal.z * light_dir.z).max(0.0);
 
-                // Apply shading to base color
-                let shaded_color = Vector3::new(
-                    base_color.x * intensity,
-                    base_color.y * intensity,
-                    base_color.z * intensity,
-                );
+                // Wrap-around lighting for softer terminator
+                let wrap = 0.4;
+                let wrapped_diffuse = (diffuse + wrap) / (1.0 + wrap);
+                
+                // Add ambient light
+                let ambient = 0.2;
+                let intensity = ambient + wrapped_diffuse * (1.0 - ambient);
+
+                // Store intensity in color for the fragment shader to use
+                let lighting_color = Vector3::new(intensity, intensity, intensity);
 
                 // Interpolate depth using barycentric coordinates
                 let depth = w1 * v1.transformed_position.z
                     + w2 * v2.transformed_position.z
                     + w3 * v3.transformed_position.z;
 
-                fragments.push(Fragment::new(p_x, p_y, shaded_color, depth));
+                fragments.push(Fragment::new(p_x, p_y, lighting_color, depth));
             }
         }
     }
